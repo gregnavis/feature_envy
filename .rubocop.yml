@@ -40,7 +40,16 @@ Metrics/MethodLength:
 Minitest/AssertPredicate:
   Enabled: false
 
+Minitest/EmptyLineBeforeAssertionMethods:
+  Enabled: false
+
+Minitest/MultipleAssertions:
+  Enabled: false
+
 Minitest/RefutePredicate:
+  Enabled: false
+
+Naming/MethodParameterName:
   Enabled: false
 
 Style/GlobalVars:
@@ -53,6 +62,9 @@ Style/MethodDefParentheses:
   EnforcedStyle: require_no_parentheses
 
 Style/NegatedIf:
+  Enabled: false
+
+Style/ParallelAssignment:
   Enabled: false
 
 Style/RaiseArgs:

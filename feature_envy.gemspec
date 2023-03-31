@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.metadata["source_code_uri"]       = spec.homepage
   spec.metadata["rubygems_mfa_required"] = "true"
 
-  spec.required_ruby_version = ">= 2.5.0"
+  spec.required_ruby_version = ">= 3.1.0"
 
   spec.files = Dir["lib/**/*", "MIT-LICENSE.txt", "README.md"]
   spec.test_files = Dir["test/**/*"]

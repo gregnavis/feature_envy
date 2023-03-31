@@ -25,6 +25,14 @@ module FeatureEnvy
   # 3. Define one or more lazy attributes via `lazy(:name) { definition }`.
   # 4. Do **NOT** read or write to the underlying attribute, e.g. `@name`;
   #    always use the accessor method.
+  # 5. Lazy accessors are **thread-safe**: the definition block will be called
+  #    at most once; if two threads call the accessor for the first time one
+  #    will win the race to run the block and the other one will wait and reuse
+  #    the value produced by the first.
+  # 6. It's impossible to reopen a class and add new lazy accessors after **the
+  #    any class using lazy accessors has been instantiated**. Doing so would
+  #    either make the code thread-unsafe or require additional thread-safety
+  #    measures, potentially reducing performance.
   #
   # ### Discussion
   #
@@ -56,6 +64,16 @@ module FeatureEnvy
   # end
   # ```
   #
+  # ### Implementation Notes
+  #
+  # 1. Defining a lazy accessor defines a method with that name. The
+  #    corresponding attribute is **not** set before the accessor is called for
+  #    the first time.
+  # 2. The first time a lazy accessor is added to a class a special module
+  #    is included into it. It provides an `initialize` method that sets
+  #    `@lazy_attributes_mutexes` - a hash of mutexes protecting each lazy
+  #    accessor.
+  #
   # @example
   #   class User
   #     # Enable the feature via refinements.
@@ -78,6 +96,9 @@ module FeatureEnvy
   #     end
   #   end
   module LazyAccessor
+    # A class representing an error related to lazy-accessors.
+    class Error < FeatureEnvy::Error; end
+
     refine Class do
       def lazy name, &definition
         LazyAccessor.define self, name, &definition
@@ -100,25 +121,107 @@ module FeatureEnvy
       LazyAccessor.define self, name, &definition
     end
 
-    # Defines a lazy accessor.
+    # A class for creating mutexes for classes that make use of lazy accessors.
     #
-    # Required to share the code between the extension and refinement.
+    # The class keeps a hash that maps modules and classes to arrays of lazy
+    # accessor names defined therein.
     #
     # @private
-    def self.define klass, name, &definition
-      variable_name = :"@#{name}"
+    class MutexFactory
+      def initialize
+        @lazy_accessors_by_class = Hash.new { |hash, klass| hash[klass] = [] }
+      end
 
-      klass.class_eval do
-        [
-          define_method(name) do
-            if instance_variable_defined? variable_name
-              instance_variable_get variable_name
-            else
-              instance_variable_set variable_name, instance_eval(&definition)
-            end
-          end
-        ]
+      # Register a new lazy attribute.
+      #
+      # @private
+      def register klass, name
+        ObjectSpace.each_object(klass) do # rubocop:disable Lint/UnreachableLoop
+          raise Error.new(<<~ERROR)
+            An instance of #{klass.name} has been already created, so it's no longer
+            possible to define a new lazy accessor, due to thread-safety reasons.
+          ERROR
+        end
+
+        @lazy_accessors_by_class[klass] << name.to_sym
+      end
+
+      # Create a hash of mutexes for a new instance.
+      #
+      # @private
+      def create_initial_hash_for instance
+        lazy_accessor_names = []
+        current_class = instance.class
+        while current_class
+          lazy_accessor_names.concat @lazy_accessors_by_class[current_class]
+          current_class = current_class.superclass
+        end
+
+        lazy_accessor_names.to_h { [_1, Thread::Mutex.new] }
       end
     end
+    private_constant :MutexFactory
+
+    @mutex_factory = MutexFactory.new
+
+    class << self
+      # A mutex factory used by the lazy accessors feature.
+      #
+      # @private
+      attr_reader :mutex_factory
+
+      # Defines a lazy accessor.
+      #
+      # Required to share the code between the extension and refinement.
+      #
+      # @private
+      def define klass, name, &definition
+        name = name.to_sym
+        variable_name = :"@#{name}"
+
+        LazyAccessor.mutex_factory.register klass, name
+
+        klass.class_eval do
+          # Include the lazy accessor initializer to ensure state related to
+          # lazy accessors is initialized properly. There's no need to include
+          # this module more than once.
+          #
+          # Question: is the inclusion check required? Brief testing indicates
+          # it's not.
+          if !include? Initialize
+            include Initialize
+          end
+
+          [
+            define_method(name) do
+              mutex = @lazy_accessors_mutexes[name]
+              if mutex # rubocop:disable Style/SafeNavigation
+                mutex.synchronize do
+                  if @lazy_accessors_mutexes.include?(name)
+                    instance_variable_set variable_name, definition.call
+                    @lazy_accessors_mutexes.delete name
+                  end
+                end
+              end
+
+              instance_variable_get variable_name
+            end
+          ]
+        end
+      end
+    end
+
+    # A module included in all classes that use lazy accessors responsible for
+    # initializing a hash of mutexes that guarantee thread-safety on first call.
+    #
+    # @private
+    module Initialize
+      def initialize ...
+        super
+
+        @lazy_accessors_mutexes = LazyAccessor.mutex_factory.create_initial_hash_for self
+      end
+    end
+    private_constant :Initialize
   end
 end

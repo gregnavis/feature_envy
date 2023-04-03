@@ -129,13 +129,16 @@ module FeatureEnvy
     # @private
     class MutexFactory
       def initialize
-        @lazy_accessors_by_class = Hash.new { |hash, klass| hash[klass] = [] }
+        @mutexes_by_class = Hash.new { |hash, klass| hash[klass] = [] }
       end
 
       # Register a new lazy attribute.
       #
+      # @return [Symbol] The name of the mutex corresponding to the specified
+      #   lazy accessor.
+      #
       # @private
-      def register klass, name
+      def register klass, lazy_accessor_name
         ObjectSpace.each_object(klass) do # rubocop:disable Lint/UnreachableLoop
           raise Error.new(<<~ERROR)
             An instance of #{klass.name} has been already created, so it's no longer
@@ -143,21 +146,22 @@ module FeatureEnvy
           ERROR
         end
 
-        @lazy_accessors_by_class[klass] << name.to_sym
+        mutex_name = :"@#{lazy_accessor_name}_mutex"
+        @mutexes_by_class[klass] << mutex_name
+        mutex_name
       end
 
-      # Create a hash of mutexes for a new instance.
+      # Create mutexes for lazy accessor supported on a given instance.
       #
       # @private
-      def create_initial_hash_for instance
-        lazy_accessor_names = []
+      def initialize_mutexes_for instance
         current_class = instance.class
         while current_class
-          lazy_accessor_names.concat @lazy_accessors_by_class[current_class]
+          @mutexes_by_class[current_class].each do |mutex_name|
+            instance.instance_variable_set mutex_name, Thread::Mutex.new
+          end
           current_class = current_class.superclass
         end
-
-        lazy_accessor_names.to_h { [_1, Thread::Mutex.new] }
       end
     end
     private_constant :MutexFactory
@@ -178,8 +182,7 @@ module FeatureEnvy
       def define klass, name, &definition
         name = name.to_sym
         variable_name = :"@#{name}"
-
-        LazyAccessor.mutex_factory.register klass, name
+        mutex_name = LazyAccessor.mutex_factory.register klass, name
 
         klass.class_eval do
           # Include the lazy accessor initializer to ensure state related to
@@ -194,12 +197,12 @@ module FeatureEnvy
 
           [
             define_method(name) do
-              mutex = @lazy_accessors_mutexes[name]
+              mutex = instance_variable_get(mutex_name)
               if mutex # rubocop:disable Style/SafeNavigation
                 mutex.synchronize do
-                  if @lazy_accessors_mutexes.include?(name)
-                    instance_variable_set variable_name, definition.call
-                    @lazy_accessors_mutexes.delete name
+                  if instance_variable_defined?(mutex_name)
+                    instance_variable_set variable_name, instance_eval(&definition)
+                    remove_instance_variable mutex_name
                   end
                 end
               end
@@ -219,7 +222,7 @@ module FeatureEnvy
       def initialize ...
         super
 
-        @lazy_accessors_mutexes = LazyAccessor.mutex_factory.create_initial_hash_for self
+        LazyAccessor.mutex_factory.initialize_mutexes_for self
       end
     end
     private_constant :Initialize

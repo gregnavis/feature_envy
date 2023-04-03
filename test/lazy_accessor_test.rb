@@ -107,9 +107,10 @@ class LazyAccessorTest < Minitest::Test
 
     instance = subclass.new
 
-    assert_equal %i[subclass_object base_class_object].sort,
-                 instance.instance_eval { @lazy_accessors_mutexes.keys }.sort,
-                 "Mutexes for lazy attributes in the entire inheritance hierarchy should have been defined"
+    assert instance.instance_variable_defined?(:@subclass_object_mutex),
+           "The mutex for a lazy attribute from the subclass should have been defined"
+    assert instance.instance_variable_defined?(:@base_class_object_mutex),
+           "The mutex for a lazy attribute from the base class should have been defined"
   end
 
   def test_reopen_class_before_instantiation_is_allowed

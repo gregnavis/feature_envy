@@ -57,6 +57,20 @@ class LazyAccessorTest < Minitest::Test
                  "The accessor block shouldn't have been executed"
   end
 
+  def test_module
+    mod = Module.new do
+      extend FeatureEnvy::LazyAccessor
+
+      lazy(:object) { Object.new }
+    end
+    klass    = Class.new { include mod }
+    instance = klass.new
+
+    assert_instance_of Object,
+                       instance.object,
+                       "Lazy accessors defined in modules should have been defined"
+  end
+
   # The idea behind the thread-safety test is the following:
   #
   # 1. Instantiate an object with a lazy accessor.

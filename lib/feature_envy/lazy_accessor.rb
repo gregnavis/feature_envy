@@ -162,6 +162,12 @@ module FeatureEnvy
           end
           current_class = current_class.superclass
         end
+
+        instance.class.included_modules.each do |mod|
+          @mutexes_by_class[mod].each do |mutex_name|
+            instance.instance_variable_set mutex_name, Thread::Mutex.new
+          end
+        end
       end
     end
     private_constant :MutexFactory

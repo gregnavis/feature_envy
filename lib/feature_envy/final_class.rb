@@ -3,21 +3,35 @@
 module FeatureEnvy
   # Final classes.
   #
+  # ### Definition
+  #
   # A final class is a class that cannot be inherited from. In other words, a
-  # final class enforces the invariant that it has no subclasses. Existence of
-  # subclasses if checked **at the moment a class is defined final** (to catch
-  # cases where a class is reopened and made final after subclasses were
-  # defined) and when.
+  # final class enforces the invariant that it has no subclasses.
   #
-  # The module can be used in two ways:
+  # ### Applications
   #
-  # 1. Using it as a refinement and calling +.final!+ in bodies of classes that
+  # Preventing subclassing of classes that weren't specifically designed for
+  # handling it.
+  #
+  # ### Usage
+  #
+  # 1. Enable the feature in a specific class via `extend Feature::FinalClass`.
+  #    The class has been marked final and there's nothing else to do.
+  #    Alternatively, ...
+  # 2. Enable the feature in a specific **scope** using a refinement via
+  #    `using FeatureEnvy::FinalClass` and call `final!` in all classes that
   #    should be marked final.
-  # 2. Extending the class with {FeatureEnvy::FinalClass}.
   #
-  # See the example below for details.
+  # ### Discussion
   #
-  # @example Final classes with refinements
+  # A class in Ruby can be made final by raising an error in its `inherited`
+  # hook. This is what this module does. However, this is **not** enough to
+  # guarantee that no subclasses will be created. Due to Ruby's dynamic nature
+  # it'd be possible to define a class, subclass, and then reopen the class and
+  # mark it final. This edge **is** taken care of and would result in an
+  # exception.
+  #
+  # @example
   #   module Models
   #     # Use the refinement within the module, so that all classes defined
   #     # within support the final! method.
@@ -26,14 +40,6 @@ module FeatureEnvy
   #     class User < Base
   #       # Mark the User class final.
   #       final!
-  #     end
-  #   end
-  #
-  # @example Final classes without refinements
-  #   module Models
-  #     class User < Base
-  #       # Mark the User class final.
-  #       extend FeatureEnvy::FinalClass
   #     end
   #   end
   module FinalClass

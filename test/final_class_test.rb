@@ -33,7 +33,7 @@ class FinalClassTest < Minitest::Test
 
   def test_error_when_superclass_made_final
     model = Class.new
-    user = Class.new model # rubocop:disable Lint/UselessAssignment
+    _user = Class.new model
 
     assert_raises FeatureEnvy::FinalClass::Error,
                   "Making a superclass final should have raised an exception" do

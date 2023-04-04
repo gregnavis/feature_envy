@@ -21,7 +21,13 @@ Layout/LineLength:
   AllowedPatterns:
     - "\\s*#\\s*@see.*"
 
+Lint/AmbiguousOperator:
+  Enabled: false
+
 Lint/EmptyClass:
+  Enabled: false
+
+Lint/NestedMethodDefinition:
   Enabled: false
 
 Metrics/BlockLength:

@@ -11,7 +11,8 @@ module FeatureEnvy
   # A base class for all errors raised by Feature Envy.
   class Error < StandardError; end
 
-  autoload :Internal,     "feature_envy/internal"
-  autoload :FinalClass,   "feature_envy/final_class"
-  autoload :LazyAccessor, "feature_envy/lazy_accessor"
+  autoload :FinalClass,    "feature_envy/final_class"
+  autoload :Internal,      "feature_envy/internal"
+  autoload :LazyAccessor,  "feature_envy/lazy_accessor"
+  autoload :ObjectLiteral, "feature_envy/object_literal"
 end

@@ -78,7 +78,7 @@ module FeatureEnvy
         subclasses = Internal.subclasses final_class
         return if subclasses.empty?
 
-        raise Error.new(final_class: final_class, subclasses: subclasses)
+        raise Error.new(final_class:, subclasses:)
       end
 
       # Determines whether a given class is marked final.

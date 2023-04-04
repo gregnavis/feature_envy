@@ -18,7 +18,6 @@ Gem::Specification.new do |spec|
   spec.required_ruby_version = ">= 3.1.0"
 
   spec.files = Dir["lib/**/*", "MIT-LICENSE.txt", "README.md"]
-  spec.test_files = Dir["test/**/*"]
 
   spec.require_paths = ["lib"]
 
@@ -29,8 +28,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest", "~> 5.18.0"
 
   # Linting
-  spec.add_development_dependency "rubocop", "~> 1.21.0"
-  spec.add_development_dependency "rubocop-minitest", "~> 0.26.1"
+  spec.add_development_dependency "rubocop", "~> 1.49.0"
+  spec.add_development_dependency "rubocop-minitest", "~> 0.29.0"
   spec.add_development_dependency "rubocop-rake", "~> 0.6.0"
 
   # Documentation

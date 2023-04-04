@@ -18,7 +18,7 @@ Layout/HashAlignment:
   EnforcedLastArgumentHashStyle: always_inspect
 
 Layout/LineLength:
-  IgnoredPatterns:
+  AllowedPatterns:
     - "\\s*#\\s*@see.*"
 
 Lint/EmptyClass:
@@ -52,6 +52,9 @@ Minitest/RefutePredicate:
 Naming/MethodParameterName:
   Enabled: false
 
+Naming/BlockForwarding:
+  Enabled: false
+
 Style/GlobalVars:
   Enabled: false
 
@@ -64,6 +67,12 @@ Style/MethodDefParentheses:
 Style/NegatedIf:
   Enabled: false
 
+Style/NumberedParameters:
+  Enabled: false
+
+Style/NumberedParametersLimit:
+  Max: 3
+
 Style/ParallelAssignment:
   Enabled: false
 
@@ -72,6 +81,9 @@ Style/RaiseArgs:
 
 Style/Semicolon:
   AllowAsExpressionSeparator: true
+
+Style/SingleLineMethods:
+  Enabled: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes

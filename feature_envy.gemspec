@@ -13,6 +13,8 @@ Gem::Specification.new do |spec|
 
   spec.metadata["homepage_uri"]          = spec.homepage
   spec.metadata["source_code_uri"]       = spec.homepage
+  spec.metadata["bug_tracker_uri"]       = "https://github.com/gregnavis/feature_envy/issues"
+  spec.metadata["documentation_uri"]     = "https://rubydoc.info/gems/feature_envy"
   spec.metadata["rubygems_mfa_required"] = "true"
 
   spec.required_ruby_version = ">= 3.1.0"

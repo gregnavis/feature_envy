@@ -5,6 +5,12 @@ Feature Envy enhances Ruby with features found in other programming languages.
 **WARNING**: This gem is still in development and a stable release hasn't been
 made yet. Bug reports and contributions are welcome!
 
+Supported features:
+
+- Final classes
+- Thread-safe lazy accessors
+- Object literals
+
 ## Installation
 
 You can install the gem by running `gem install feature_envy` or adding it to

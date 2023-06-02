@@ -15,4 +15,5 @@ module FeatureEnvy
   autoload :Internal,      "feature_envy/internal"
   autoload :LazyAccessor,  "feature_envy/lazy_accessor"
   autoload :ObjectLiteral, "feature_envy/object_literal"
+  autoload :Inspect,       "feature_envy/inspect"
 end

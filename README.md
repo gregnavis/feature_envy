@@ -10,6 +10,7 @@ Supported features:
 - Final classes
 - Thread-safe lazy accessors
 - Object literals
+- Inspect (inspired by Elixir's `Kernel.inspect/2`)
 
 ## Installation
 

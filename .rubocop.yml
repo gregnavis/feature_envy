@@ -24,6 +24,9 @@ Layout/LineLength:
 Lint/AmbiguousOperator:
   Enabled: false
 
+Lint/AmbiguousRegexpLiteral:
+  Enabled: false
+
 Lint/EmptyClass:
   Enabled: false
 

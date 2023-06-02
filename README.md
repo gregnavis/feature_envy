@@ -93,6 +93,13 @@ end
 # In this case, we just call the regular #inspect and send results to stderr.
 FeatureEnvy::Inspect.inspector = FeatureEnvy::Inspect::InspectInspector
 FeatureEnvy::Inspect.output = $stderr
+
+# Alternatively, in a Rails app:
+FeatureEnvy::Inspect.output = FeatureEnvy::Inspect::LoggerAdapter.new Rails.logger
+
+# Now, inspect! is ready to use. For example, this will print the user to stderr
+# or via the logger, depending on which output above was chosen.
+User.find(5).inspect!
 ```
 
 ## Author

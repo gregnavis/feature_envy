@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module FeatureEnvy
-  # @private
+  # @!visibility private
   module Internal
     # Returns all subclasses of the given class.
     def self.subclasses parent_class

@@ -7,6 +7,13 @@ require_relative "feature_envy/version"
 # Features are independent from each other and are implemented in separate
 # submodules. Refer to module documentation for details on how each feature can
 # be enabled and used.
+#
+# The following features are available:
+#
+# - {FeatureEnvy::FinalClass} - final classes.
+# - {FeatureEnvy::LazyAccessor} - lazy accessors.
+# - {FeatureEnvy::ObjectLiteral} - object literals.
+# - {FeatureEnvy::Inspect} - Elixir-style inspect.
 module FeatureEnvy
   # A base class for all errors raised by Feature Envy.
   class Error < StandardError; end
